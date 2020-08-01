@@ -4,24 +4,39 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import pandas as pd
+import numpy as np
+from slackclient import SlackClient
+import os
+
+# TEST_BOT_TOKEN = "xoxb-27173653120-1274574860293-SPQsVMNMQdG7NUh1Tp67ONSU"
+#
+#
+# slack_client = SlackClient(os.environ.get('TEST_BOT_TOKEN'))
+# test_bot_id = None
+#
+# RTM_READ_DELAY
+
 
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 
 driver.get("https://cityofla.ezlinksgolf.com/index.html#/preSearch")
-print(driver.title)
+#print(driver.title)
 
 search_button = driver.find_element_by_xpath("//button[@type = 'submit']")
 #search_button
 search_button.click()
 
+time.sleep(1)
+
 find_date_input = driver.find_element_by_id("dateInput")
 find_date_input.clear()
 # TO DO: Have this date be an input
-#time.sleep(2)
+time.sleep(2)
 find_date_input.send_keys("08/03/2020") # Need to change this to an input
 find_date_input.send_keys(Keys.TAB)
-#time.sleep(2)
+time.sleep(2)
 find_num_players = driver.find_element_by_id("pc")
 find_num_players.click()
 
@@ -52,14 +67,27 @@ search_button.click()
     #)
 ##    driver.quit()
 
-
-
 ##########################
 
 # Pulling times from the site for each course
+time.sleep(4)
+tee_time = driver.find_element_by_class_name("tee-time-block")
+tee_txt = tee_time.text
 
+tee_text_list = tee_txt.split("\nVIEW") #Splitting on the view string to get list of times
 
+tee_list_list = [i.split("\n") for i in tee_text_list if i]
+tee_list_list
 
+for list in tee_list_list:
+    if list[0] == '':
+        list[:] = list[1:] # for item in list if item]
+
+print(tee_list_list)
+
+tee_times_df = pd.DataFrame(tee_list_list, columns = ['Course', 'Time', 'Price', 'Players'])
+
+tee_times_df.astype(tee_types)
 
 
 # ID, class, name, tag
@@ -68,6 +96,5 @@ search_button.click()
 # When do you want to play (ID = "dateInput")
 
 time.sleep(5)
-
 
 driver.quit()
