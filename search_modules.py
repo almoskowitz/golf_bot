@@ -3,51 +3,69 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 import time
 import pandas as pd
-import numpy as np
-from slackclient import SlackClient
 import os
 
-# TEST_BOT_TOKEN = "xoxb-27173653120-1274574860293-SPQsVMNMQdG7NUh1Tp67ONSU"
-#
-#
-# slack_client = SlackClient(os.environ.get('TEST_BOT_TOKEN'))
-# test_bot_id = None
-#
-# RTM_READ_DELAY
-
+#Find the browser and make it not open
 PATH = "C:\Program Files (x86)\chromedriver.exe"
-driver = webdriver.Chrome(PATH)
+chrome_options = Options()
+chrome_options.add_argument("--headless")
 
-driver.get("https://cityofla.ezlinksgolf.com/index.html#/preSearch")
-#print(driver.title)
+def navigate(siteName, PATH, chrome_options):
+    """Opens webbrowser per the definitions above and navigates to site
+    sitename = "https://cityofla.ezlinksgolf.com/index.html#/preSearch" """
+    # open browser silently
+    driver = webdriver.Chrome(PATH, options=chrome_options)
+    # navigate to the proper website
+    driver.get(siteName)
+    time.sleep(2)
+    if (!driver.title):
+        print("Site failed to load")
 
-search_button = driver.find_element_by_xpath("//button[@type = 'submit']")
-#search_button
-search_button.click()
+def click_search():
+    """ Method to click the search button. Need to do once upon entering site
+    and another time to search after selecting options """
 
-time.sleep(1)
+    search_button = driver.find_element_by_xpath("//button[@type = 'submit']")
+    #search_button
+    search_button.click()
 
-find_date_input = driver.find_element_by_id("dateInput")
-find_date_input.clear()
-# TO DO: Have this date be an input
-time.sleep(2)
-find_date_input.send_keys("08/03/2020") # Need to change this to an input
-find_date_input.send_keys(Keys.TAB)
-time.sleep(2)
-find_num_players = driver.find_element_by_id("pc")
-find_num_players.click()
+def change_date(date):
+    #Finds and clears date
+    find_date_input = driver.find_element_by_id("dateInput")
+    find_date_input.clear()
+    find_date_input.send_keys(date) # Need to change this to an input
+    find_date_input.send_keys(Keys.TAB)
 
-# TO DO: allow to select number of players
-find_num_players.send_keys(Keys.ARROW_UP) ## Need to do to select num players
-find_num_players.send_keys(Keys.RETURN) ## close the dialogue box
-#time.sleep(2)
+def change_players(players):
+    find_num_players = driver.find_element_by_id("pc")
+    find_num_players.click()
+    clicks = 4 - players
+    direction = 'up'
+    if clicks < 0:
+        clicks = -clicks
+        direction = 'down'
+    click(clicks, direction)
+    # close the dialogue box
+    find_num_players.send_keys(Keys.RETURN)
+
+def click(num, direction = 'up'):
+    if direction == 'up':
+        for i in range(num):
+            find_num_players.send_keys(Keys.ARROW_UP)
+    else:
+        for i in range(num):
+            find_num_players.send_keys(Keys.ARROW_DOWN)
+
+def select_courses(*args):
+
+
 # TO DO Creating a lookup dictionary for courses
 #course_dict = {"Griffith Park - Harding": 5997, "Griffith Park - Wilson": 5998}
 
 # TO DO need to iterate amongst length of list of inputs and feed to value field
-
 
 course_select = driver.find_elements_by_xpath("//input[@title='Select a course' and @value='5998']")[0]
 course_select.click()
@@ -82,11 +100,8 @@ for list in tee_list_list:
     if list[0] == '':
         list[:] = list[1:] # for item in list if item]
 
-print(tee_list_list)
-
 tee_times_df = pd.DataFrame(tee_list_list, columns = ['Course', 'Time', 'Price', 'Players'])
-
-tee_times_df.astype(tee_types)
+tee_times_df
 
 
 # ID, class, name, tag
