@@ -60,6 +60,10 @@ def click(num, direction = 'up'):
             find_num_players.send_keys(Keys.ARROW_DOWN)
 
 def select_courses(*args):
+    for i in args:
+        xpath = "//input[@title='Select a course' and @value='" + str(i) + "']"
+        course_select = driver.find_elements_by_xpath(xpath)[0]
+        course_select.click()
 
 
 # TO DO Creating a lookup dictionary for courses
